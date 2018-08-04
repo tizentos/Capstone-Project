@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Distail</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="product_item_price">%1$s%2$f</string>
+    <string name="contentDescription">image</string>
+    <string name="menu_signout">Sign-out</string>
+    <string name="menu_history">History</string>
+    <string name="menu_cart">Cart</string>
+    <string name="search">Search</string>
+</resources>
