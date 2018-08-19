@@ -17,4 +17,31 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+
+
+    <style name="RavePayTheme" parent="AppTheme.NoActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="OTPButtonStyle">@style/otpBtnStyle</item>
+        <item name="PayButtonStyle">@style/payBtnStyle</item>
+        <item name="PinButtonStyle">@style/pinButtonStyle</item>
+        <item name="OTPHeaderStyle">@style/otpHeaderStyle</item>
+        <item name="TabLayoutStyle">@style/tabLayoutStyle</item>
+        <item name="PinHeaderStyle">@style/pinHeaderStyle</item>
+        <item name="SavedCardButtonStyle">@style/svdCardsBtnStyle</item>
+    </style>
+
+
+    <!--<style name="GreenTheme" parent="FirebaseUI">-->
+        <!--&lt;!&ndash; Required for sign-in flow styling &ndash;&gt;-->
+        <!--<item name="colorPrimary">@color/material_green_500</item>-->
+        <!--<item name="colorPrimaryDark">@color/material_green_700</item>-->
+        <!--<item name="colorAccent">@color/material_purple_a700</item>-->
+
+        <!--<item name="colorControlNormal">@color/material_green_500</item>-->
+        <!--<item name="colorControlActivated">@color/material_lime_a700</item>-->
+        <!--<item name="colorControlHighlight">@color/material_green_a200</item>-->
+        <!--<item name="android:windowBackground">@color/material_green_50</item>-->
+    <!--</style>-->
 </resources>

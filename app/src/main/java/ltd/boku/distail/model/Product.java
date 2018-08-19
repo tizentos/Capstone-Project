@@ -2,7 +2,11 @@ package ltd.boku.distail.model;
 
 import android.net.Uri;
 
-public class Product {
+import com.google.firebase.database.Exclude;
+
+import java.io.Serializable;
+
+public class Product  implements Serializable {
     private String name;
     private int quantity;
     private String description;
@@ -12,6 +16,9 @@ public class Product {
     private String merchantId;
     private  String category;
     private String photoUrl;
+
+    @Exclude
+    private static final long serialVersionUID=1L;
 
     public Product() {
     }

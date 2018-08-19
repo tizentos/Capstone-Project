@@ -3,14 +3,13 @@ package ltd.boku.distail;
 import android.app.SearchManager;
 import android.app.SearchableInfo;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -20,7 +19,6 @@ import android.view.View;
 import android.widget.SearchView;
 import android.widget.Toast;
 
-import com.firebase.ui.auth.data.model.User;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -34,19 +32,23 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
-import java.sql.Array;
 import java.util.ArrayList;
 import java.util.List;
 
 import ltd.boku.distail.adapter.ProductFirebaseRecyclerAdapter;
 import ltd.boku.distail.model.Cart;
 import ltd.boku.distail.model.Product;
-import ltd.boku.distail.ui_helper.ItemDecorationProductList;
 
-public class MainActivity extends AppCompatActivity{
+import static ltd.boku.distail.adapter.ProductFirebaseRecyclerAdapter.PRODUCT;
+import static ltd.boku.distail.fragment.ReviewFragment.CURRENT_USER;
 
+public class MainActivity extends AppCompatActivity implements ProductFirebaseRecyclerAdapter.OnItemClickListener{
+
+    public static final String PRODUCT_DETAIL_BUNDLE="product_detail_bundle";
+    public static final String PRODUCT_KEY="key";
+    public static final String IN_CART="in_cart";
     FirebaseDatabase mFirebaseDatabase;
-    DatabaseReference ProductDatabaseReference;
+    DatabaseReference rootProductDatabaseReference;
     DatabaseReference UserDatabaseReference;
     DatabaseReference UserCartReference;
     FirebaseAuth mFirebaseAuth;
@@ -71,7 +73,7 @@ public class MainActivity extends AppCompatActivity{
 
         mFirebaseDatabase=FirebaseDatabase.getInstance();
         mFirebaseAuth = FirebaseAuth.getInstance();
-        ProductDatabaseReference=mFirebaseDatabase.getReference().child("Product");
+        rootProductDatabaseReference =mFirebaseDatabase.getReference().child("product");
         UserDatabaseReference=mFirebaseDatabase.getReference().child("user");
 
 
@@ -83,7 +85,7 @@ public class MainActivity extends AppCompatActivity{
                 if (firebaseUser != null){
                     Toast.makeText(getApplicationContext(), "Logged in already", Toast.LENGTH_SHORT).show();
                     initializeUser(firebaseUser);
-                    setupRecyclerView();
+                    setupRecyclerView(null);
                 } else{
                     mFirebaseAuth.signInAnonymously().addOnSuccessListener(new OnSuccessListener<AuthResult>() {
                         @Override
@@ -93,7 +95,7 @@ public class MainActivity extends AppCompatActivity{
                             Toast.makeText(getApplicationContext(),"Log-in anonymously",Toast.LENGTH_LONG).show();
                             assert firebaseUser != null;
                             initializeUser(firebaseUser);
-                            setupRecyclerView();
+                            setupRecyclerView(null);
                         }
                     }).addOnFailureListener(new OnFailureListener() {
                         @Override
@@ -105,7 +107,7 @@ public class MainActivity extends AppCompatActivity{
             }
         };
 
-       // seedProductData();
+       //seedProductData();
 
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -121,7 +123,7 @@ public class MainActivity extends AppCompatActivity{
     private void initializeUser(FirebaseUser firebaseUser) {
         Log.d(TAG, "initializeUser: entering");
 
-        mUser=new ltd.boku.distail.model.User(firebaseUser.getUid(),"anonymous");
+        mUser=new ltd.boku.distail.model.User(firebaseUser.getUid(),"anonymous",firebaseUser.getDisplayName());
         UserDatabaseReference.child(mUser.getUserId()).setValue(mUser);
 
         UserCartReference=mFirebaseDatabase.getReference("Cart").child(mUser.getUserId());
@@ -145,7 +147,6 @@ public class MainActivity extends AppCompatActivity{
                         productFirebaseRecyclerAdapter.setCart(UserCart);
                         productFirebaseRecyclerAdapter.notifyDataSetChanged();
                     }
-
                 }
             }
             @Override
@@ -155,8 +156,15 @@ public class MainActivity extends AppCompatActivity{
         });
     }
 
-    private void setupRecyclerView() {
-        Query query= ProductDatabaseReference.orderByKey();
+    private void setupRecyclerView(String searchQuery) {
+        Query query;
+        if (searchQuery ==null){
+            query= rootProductDatabaseReference.orderByKey();
+        } else{
+            query= rootProductDatabaseReference.orderByChild("name")
+                    .startAt(searchQuery).endAt(searchQuery+ "\uf8ff");
+        }
+
 
         FirebaseRecyclerOptions options= new FirebaseRecyclerOptions.Builder<Product>()
                 .setQuery(query,Product.class)
@@ -173,21 +181,31 @@ public class MainActivity extends AppCompatActivity{
 //        ProductListRecyclerView.addItemDecoration(new ItemDecorationProductList(
 //                8,2
 //        ));
-
         ProductListRecyclerView.setAdapter(productFirebaseRecyclerAdapter);
-
     }
 
     public void seedProductData(){
+        String[]  category={ "electronics", "men wear", "groceries", "ladies wear"};
+        int[]  price ={ 100,200,300,400,500};
+        String[] name = {"Tosin", "Clara", "Polo", "Crest","Phoenix"};
+
         for (int i =0; i<50; i++ ){
-            ProductDatabaseReference.push().setValue(new Product("Tosin",2,"Another product",500,"$",4,
-                    "34534534fv","Men",
-                    "https://firebasestorage.googleapis.com/v0/b/friendlychat-1af6c.appspot.com/o/chat_photos%2Fsample%202.PNG?alt=media&token=05036ac8-a8d9-4d17-94da-744d09a9e72b"));
+
+            int catIndex=(int) Math.round(Math.random()* (category.length-1));
+            int priceIndex=(int) Math.round(Math.random()* (price.length-1));
+            int nameIndex=(int) Math.round(Math.random()* (name.length-1));
+
+            Log.d(TAG, "seedProductData: catindex: "+ catIndex + "priceIndex: " + priceIndex + "nameIndex" + nameIndex);
+            Product product=new Product(name[nameIndex],2,"Another product",price[priceIndex],"USD",4,
+                    "34534534fv",category[catIndex],
+                    "https://firebasestorage.googleapis.com/v0/b/friendlychat-1af6c.appspot.com/o/chat_photos%2Fsample%202.PNG?alt=media&token=05036ac8-a8d9-4d17-94da-744d09a9e72b");
+            rootProductDatabaseReference.push().setValue(product);
         }
     }
     @Override
     protected void onResume() {
         super.onResume();
+        Log.d(TAG, "onResume: entering");
         mFirebaseAuth.addAuthStateListener(mAuthStateListener);
     }
     @Override
@@ -208,12 +226,14 @@ public class MainActivity extends AppCompatActivity{
         mSearchView.setSearchableInfo(searchableInfo);
         mSearchView.setIconified(true);
         mSearchView.setQueryHint("Product name");
+        mSearchView.setMaxWidth(1000);
 
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 Toast.makeText(MainActivity.this, query, Toast.LENGTH_SHORT).show();
                 mSearchView.clearFocus();
+                setupRecyclerView(query);
                 return true;
             }
             @Override
@@ -221,28 +241,36 @@ public class MainActivity extends AppCompatActivity{
                 return false;
             }
         });
-
-        MenuItem menuItem=menu.findItem(R.id.app_bar_search);
-        final MenuItem cartMenu=menu.findItem(R.id.menu_cart);
-        cartMenu.setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
-        menuItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
-            @Override
-            public boolean onMenuItemActionExpand(MenuItem item) {
-                cartMenu.setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_NEVER);
-                return true;
-            }
-            @Override
-            public boolean onMenuItemActionCollapse(MenuItem item) {
-               cartMenu.setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
-                return true;
-            }
-        });
-
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        return super.onOptionsItemSelected(item);
+        int id= item.getItemId();
+
+        switch (id){
+            case R.id.menu_cart:
+                Intent intent=new Intent(this,CartActivity.class);
+                intent.putExtra(CURRENT_USER,mUser);
+                startActivity(intent);
+                return true;
+            default:
+                break;
+        }
+        return false;
     }
+
+    @Override
+    public void onItemClickListener(Product model, boolean inCart,String key) {
+        Intent intent=new Intent(this,ProductDetailActivity.class);
+        Bundle bundle=new Bundle();
+        bundle.putSerializable(PRODUCT,model);
+        bundle.putSerializable(CURRENT_USER,mUser);
+        bundle.putBoolean(IN_CART,inCart);
+        bundle.putString(PRODUCT_KEY,key);
+
+        intent.putExtra(PRODUCT_DETAIL_BUNDLE,bundle);
+        startActivity(intent);
+    }
+
 }

@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:context=".ProductDetailActivity">
+
+            <ImageView
+                android:id="@+id/product_detail_image"
+                android:layout_width="wrap_content"
+                android:layout_height="239dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="1.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_chainStyle="packed"
+                app:srcCompat="@drawable/placeholder" />
+
+            <TextView
+                android:id="@+id/product_detail_price"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:text="TextView"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/product_detail_image" />
+
+            <LinearLayout
+                android:id="@+id/linearLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/product_detail_price">
+
+                <RatingBar
+                    android:id="@+id/product_detail_rating"
+                    style="@style/Widget.AppCompat.RatingBar.Indicator"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="-55dp"
+                    android:isIndicator="true"
+                    android:max="5"
+                    android:maxHeight="30dp"
+                    android:maxWidth="25dp"
+                    android:minHeight="25dp"
+                    android:numStars="5"
+                    android:padding="0dp"
+                    android:rating="5"
+                    android:scaleX="0.4"
+                    android:scaleY="0.4"
+                    android:stepSize="1"
+                    android:theme="?attr/ratingBarStyleSmall" />
+            </LinearLayout>
+
+
+            <ImageButton
+                android:id="@+id/product_detail_favorite"
+                android:layout_width="wrap_content"
+                android:layout_height="52dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="8dp"
+                android:background="@color/fui_transparent"
+                android:contentDescription="@string/contentDescription"
+                app:layout_constraintBottom_toBottomOf="@+id/product_detail_purchase"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/product_detail_purchase"
+                app:layout_constraintVertical_bias="1.0"
+                app:srcCompat="@drawable/ic_favorite_border_black_48dp" />
+
+            <android.support.constraint.Guideline
+                android:id="@+id/guideline2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="152dp"
+                android:orientation="horizontal"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintGuide_percent="0.7"
+                app:layout_constraintTop_toBottomOf="@+id/product_detail_price" />
+
+            <android.support.design.widget.TabLayout
+                android:id="@+id/tabs"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:layout_marginTop="8dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/linearLayout">
+
+            </android.support.design.widget.TabLayout>
+
+            <android.support.v4.view.ViewPager
+                android:id="@+id/viewPager"
+                android:layout_width="0dp"
+                android:layout_height="300dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tabs"
+                app:layout_constraintVertical_bias="0.0" />
+
+            <Button
+                android:id="@+id/product_detail_purchase"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="@string/product_detail_purchase"
+                app:layout_constraintBottom_toBottomOf="@+id/linearLayout"
+                app:layout_constraintStart_toEndOf="@+id/linearLayout"
+                app:layout_constraintTop_toTopOf="@+id/linearLayout"
+                tools:text="@string/product_detail_purchase" />
+        </android.support.constraint.ConstraintLayout>
+    </ScrollView>
+</layout>

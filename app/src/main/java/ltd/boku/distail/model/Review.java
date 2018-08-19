@@ -8,15 +8,17 @@ public class Review {
     private String productId;
     private String description;
     private String userId;
+    private String author;
 
     public Review() {
     }
 
-    public Review(String productPath, String productId, String description, String userId) {
+    public Review(String productPath, String productId, String description, String userId,String author) {
         this.productPath = productPath;
         this.productId = productId;
         this.description = description;
         this.userId = userId;
+        this.author=author;
     }
 
     public String getProductPath() {
@@ -49,5 +51,13 @@ public class Review {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
     }
 }

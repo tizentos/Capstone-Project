@@ -1,6 +1,7 @@
 package ltd.boku.distail.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -19,15 +20,14 @@ import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.firebase.ui.database.ObservableSnapshotArray;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import ltd.boku.distail.ProductDetailActivity;
 import ltd.boku.distail.R;
 import ltd.boku.distail.model.Cart;
 import ltd.boku.distail.model.Product;
@@ -35,21 +35,17 @@ import ltd.boku.distail.model.Product;
 public class ProductFirebaseRecyclerAdapter extends FirebaseRecyclerAdapter<Product,ProductFirebaseRecyclerAdapter.ProductViewHolder> {
 
     private Context mContext;
-    private OnAddCartListener mOnAddCartListener;
-    private OnRemoveCartListener mOnRemoveCartListener;
+    private OnItemClickListener mOnItemClickListener;
     private Cart cart;
     DatabaseReference CartReference;
     private List<String> productIds=new ArrayList<>();
 
     private static final String TAG = "ProductFirebaseRecycler";
+    public static final String PRODUCT="product";
 
-    public interface OnAddCartListener{
-         void onUpdateCartListener(String productKey);
+    public interface OnItemClickListener{
+         void onItemClickListener(Product model,boolean inCart,String key);
     }
-    public interface OnRemoveCartListener{
-        void onRemoveCartListener(String productKey);
-    }
-
 
     public ProductFirebaseRecyclerAdapter(@NonNull FirebaseRecyclerOptions<Product> options, Context context,Cart cart,DatabaseReference cartReference) {
         super(options);
@@ -58,13 +54,14 @@ public class ProductFirebaseRecyclerAdapter extends FirebaseRecyclerAdapter<Prod
         if (this.cart != null){
             productIds=cart.getProductIds();
         }
-//        mOnAddCartListener=(OnAddCartListener) context;
-//        mOnRemoveCartListener=(OnRemoveCartListener)context;
+
+        mOnItemClickListener=(OnItemClickListener)context;
+
         CartReference=cartReference;
     }
 
     @Override
-    protected void onBindViewHolder(@NonNull final ProductViewHolder holder, int position, @NonNull Product model) {
+    protected void onBindViewHolder(@NonNull final ProductViewHolder holder, int position, @NonNull final Product model) {
 
         Picasso.with(mContext).load(Uri.parse(model.getPhotoUrl()))
                 .placeholder(R.drawable.placeholder)
@@ -74,7 +71,7 @@ public class ProductFirebaseRecyclerAdapter extends FirebaseRecyclerAdapter<Prod
         holder.favoriteButton.setImageDrawable(mContext.getResources().getDrawable(R.drawable.ic_favorite_border_black_24dp));
 
         final String key = this.getRef(position).getKey();
-        boolean inCart=checkIfProductIncart(holder, key);
+        final boolean inCart=checkIfProductIncart(holder, key);
 
 
         holder.productRating.setRating(model.getRating());
@@ -108,6 +105,15 @@ public class ProductFirebaseRecyclerAdapter extends FirebaseRecyclerAdapter<Prod
                         Log.d(TAG, "onFailure: cart update error");
                     }
                 });
+            }
+        });
+
+        holder.productImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+               // boolean inCart=checkIfProductIncart(holder, key);
+                //TODO check for bug
+               mOnItemClickListener.onItemClickListener(model,inCart,key);
             }
         });
     }
@@ -168,8 +174,8 @@ public class ProductFirebaseRecyclerAdapter extends FirebaseRecyclerAdapter<Prod
             productImage=itemView.findViewById(R.id.product_item_image);
             productName=itemView.findViewById(R.id.product_item_name_text);
             productPrice=itemView.findViewById(R.id.product_item_price_text);
-            productRating=itemView.findViewById(R.id.product_item_rating);
-            favoriteButton=itemView.findViewById(R.id.product_item_favorite_button);
+            productRating=itemView.findViewById(R.id.product_detail_rating);
+            favoriteButton=itemView.findViewById(R.id.product_detail_favorite);
         }
     }
 }
